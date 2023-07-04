@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
         public Guid Key { get; set; }
-        public DateTime CreationDate { get; set; }
+        public DateTime Date { get; set; }
     }
 }

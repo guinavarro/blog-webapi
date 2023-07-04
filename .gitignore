@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+*.v2
+*.1
+*.dll
+*.props
+*.exe
+/src/Blog.WebApi.Api/obj/Debug/net7.0/Blog.WebApi.Api.assets.cache
+*.BuildWithSkipAnalyzers
+*.config
+*.vsidx
+/.vs/Blog.WebApi/v17/.suo
