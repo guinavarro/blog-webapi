@@ -11,8 +11,10 @@ namespace Blog.WebApi.Infra
             AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
         }
 
-        public DbSet<Author> Authors { get; set; }
-        public DbSet<Post> Posts { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<ImageFile> Images { get; set; }
+        //public DbSet<Author> Authors { get; set; }
+        //public DbSet<Post> Posts { get; set; }
         public DbSet<Tag> Tags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

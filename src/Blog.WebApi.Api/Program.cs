@@ -1,6 +1,6 @@
 
 using Blog.WebApi.Infra;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+//using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -12,25 +12,25 @@ var config = builder.Configuration;
 
 builder.Services.AddCors();
 
-builder.Services.AddAuthentication(_ =>
-{
-    _.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    _.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    _.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(_ =>
-{
-    // Como vai ser validado a chave
-    _.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidIssuer = config["JwtSettings:Issuer"],
-        ValidAudience = config["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true, 
-        ValidateIssuerSigningKey = true
-    };
-});
+//builder.Services.AddAuthentication(_ =>
+//{
+//    _.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    _.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//    _.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+//}).AddJwtBearer(_ =>
+//{
+//    // Como vai ser validado a chave
+//    _.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidIssuer = config["JwtSettings:Issuer"],
+//        ValidAudience = config["JwtSettings:Audience"],
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
+//        ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidateLifetime = true, 
+//        ValidateIssuerSigningKey = true
+//    };
+//});
 
 builder.Services.AddAuthorization();
 
@@ -46,6 +46,7 @@ builder.Services.AddDbContext<BlogContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.ResolveDependencies();
 
 var app = builder.Build();
 
