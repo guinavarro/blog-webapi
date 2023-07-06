@@ -6,10 +6,10 @@ namespace Blog.WebApi.Infra
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly DbContext _context;
+        private readonly BlogContext _context;
         private IDbContextTransaction _transaction;
 
-        public UnitOfWork(DbContext context)
+        public UnitOfWork(BlogContext context)
         {
             _context = context;
         }

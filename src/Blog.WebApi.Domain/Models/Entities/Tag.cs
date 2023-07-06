@@ -3,6 +3,8 @@
     public class Tag : Base
     {
         public string Name { get; private set; }
+        public ICollection<TagsPost> TagsPost { get; private set; }
+
 
         public Tag(string name)
         {

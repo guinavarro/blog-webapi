@@ -13,14 +13,16 @@ namespace Blog.WebApi.Infra
 
         public DbSet<User> Users { get; set; }
         public DbSet<ImageFile> Images { get; set; }
-        //public DbSet<Author> Authors { get; set; }
-        //public DbSet<Post> Posts { get; set; }
+        public DbSet<Author> Authors { get; set; }
+        public DbSet<Post> Posts { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<TagsPost> TagsPosts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.HasPostgresExtension("uuid-ossp");
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
         }
     }

@@ -9,8 +9,10 @@ namespace Blog.WebApi.Domain.Models.Entities
         public string Title { get; private set; }
         public string Content { get; private set; }
 
+
         [ForeignKey("FileId")]
         public virtual ImageFile ImagePost { get; private set; }
+        public ICollection<TagsPost> TagsPost { get; private set; }
 
         public Post(int authorId, string title, string content, Guid key, int? fileId = null) : base(key)
         {

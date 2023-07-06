@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Blog.WebApi.Domain.Models.Entities
 {
@@ -13,9 +8,9 @@ namespace Blog.WebApi.Domain.Models.Entities
         public int TagId { get; private set; }
 
         [ForeignKey("PostId")]
-        public virtual Post Post { get; set; }
+        public ICollection<Post> Posts { get; set; }
         [ForeignKey("TagId")]
-        public virtual Tag Tag { get; set; }
+        public ICollection<Tag> Tags { get; set; }
 
 
         public TagsPost()
