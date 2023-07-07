@@ -44,6 +44,8 @@ namespace Blog.WebApi.Domain.Services
 
                 var postKey = Guid.NewGuid();
                 _postRepository.Add(new Post(1, model.Title, model.Message, postKey, imageId));
+                await _postRepository.SaveChangesAsync();
+
                 var post = await _postRepository.Find<Post>(postKey);
 
                 if (model.Tags.Any())
@@ -55,15 +57,18 @@ namespace Blog.WebApi.Domain.Services
 
                         if (tagAlreadyExist.Item1 == true)
                         {
-                            _tagsPostRepository.Add(new TagsPost(post.Id, tagAlreadyExist.Item2.Value)); 
+                            _tagsPostRepository.Add(new TagsPost(post.Id, tagAlreadyExist.Item2.Value));
+                            await _tagRepository.SaveChangesAsync();
                         }
 
                         // If tag doesn't exists, we will add on database
                         var tagKey = Guid.NewGuid();
                         _tagRepository.Add(new Tag(tagModel, tagKey));
+                        await _tagRepository.SaveChangesAsync();
 
                         var lastTagInserted = await _tagRepository.Find<Tag>(tagKey);
                         _tagsPostRepository.Add(new TagsPost(post.Id, lastTagInserted.Id));
+                        await _tagsPostRepository.SaveChangesAsync();
                     }
                 }
 

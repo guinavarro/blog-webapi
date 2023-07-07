@@ -12,6 +12,7 @@ namespace Blog.WebApi.Infra
         public static IServiceCollection ResolveDependencies(this IServiceCollection services)
         {
             services.AddScoped<IBlogService, BlogService>();
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<ITagRepository, TagRepository>();
