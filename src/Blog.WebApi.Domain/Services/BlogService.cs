@@ -1,10 +1,10 @@
-﻿using Blog.WebApi.Domain.Interfaces;
+﻿using Blog.WebApi.Domain.Helpers.Extensions;
+using Blog.WebApi.Domain.Interfaces;
 using Blog.WebApi.Domain.Interfaces.Repository;
 using Blog.WebApi.Domain.Interfaces.Services;
 using Blog.WebApi.Domain.Models.Entities;
 using Blog.WebApi.Domain.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 
 namespace Blog.WebApi.Domain.Services
 {
@@ -33,10 +33,10 @@ namespace Blog.WebApi.Domain.Services
                 // TODO: Criar validação pra ver qual é o usuário logado            
 
                 int? imageId = null;
-                if (model.FileBytes is not null)
+                if (model.Image is not null)
                 {
                     var imageKey = Guid.NewGuid();
-                    _imageFileRepository.Add(new ImageFile("", model.FileBytes, "jpeg", imageKey));
+                    _imageFileRepository.Add(new ImageFile(GenerateFileName(model.Title, model.Image.ContentType), IFormFileToByteArray(model.Image), model.Image.ContentType, imageKey));
 
                     var imagePost = await _imageFileRepository.Find<ImageFile>(imageKey);
                     imageId = imagePost?.Id;
@@ -82,6 +82,21 @@ namespace Blog.WebApi.Domain.Services
             }
         }
 
-      
+
+        #region Private Methods
+
+
+        private string GenerateFileName(string postName, string fileType) =>
+            $"{postName.TransformToLowerCase()}_{DateTime.Now:ddMMyyyy_HHmm}.{fileType}";
+        private static byte[] IFormFileToByteArray(IFormFile formFile)
+        {
+            using (var ms = new MemoryStream())
+            {
+                formFile.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+        #endregion
+
     }
 }
