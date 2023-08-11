@@ -16,10 +16,10 @@ namespace Blog.WebApi.Infra.Mapping
             builder.Property(_ => _.PostId).IsRequired();
             builder.Property(_ => _.TagId).IsRequired();
 
-            builder.HasMany(_ => _.Tags)
+            builder.HasOne(_ => _.Tag)
                 .WithMany(_ => _.TagsPost);
 
-            builder.HasMany(_ => _.Posts)
+            builder.HasOne(_ => _.Post)
                 .WithMany(_ => _.TagsPost);
                 
         }

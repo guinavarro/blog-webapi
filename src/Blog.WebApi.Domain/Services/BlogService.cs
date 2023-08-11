@@ -113,12 +113,49 @@ namespace Blog.WebApi.Domain.Services
                     Name = post.ImagePost.Name,
                     DataBase64 = Convert.ToBase64String(post.ImagePost.Data),
                     ContentType = post.ImagePost.ContentType
-                } : null,
-                Tags = post.TagsPost?.SelectMany(tagPost => tagPost.Tags.Select(tag => tag.Name)).ToList() ?? new List<string>()
+                } : null
             };
 
             return new Return<PostViewModel>(true, "A busca retornou o Post com sucesso", postViewModel);
         }
+
+
+        public async Task<Return<IEnumerable<PostViewModel>>> GetAllPosts() // TODO: criar filtro
+        {
+            var postList = new List<PostViewModel>();
+
+            var posts = await _postRepository.GetAllPosts();
+
+            if (posts == null)
+            {
+                return new Return<IEnumerable<PostViewModel>>(false, "Não foi encontrado nenhum post");
+            }
+
+            if (posts.Any())
+            {
+                foreach (var post in posts)
+                {
+                    var postViewModel = new PostViewModel
+                    {
+                        Title = post.Title,
+                        Message = post.Content,
+                        Tags = post.TagsPost.Any() ? post.TagsPost.Select(_ => _.Tag.Name).ToList() : null,
+                        Image = post.ImagePost != null ? new ImageViewModel
+                        {
+                            Name = post.ImagePost.Name,
+                            DataBase64 = Convert.ToBase64String(post.ImagePost.Data),
+                            ContentType = post.ImagePost.ContentType
+                        } : null
+                    };
+
+                    postList.Add(postViewModel);
+                }
+            }
+
+            return new Return<IEnumerable<PostViewModel>>(true, $"Busca realizada com sucesso: ${postList.Count} registros", postList);
+
+        }
+
         #endregion
 
         #region Private Methods

@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace Blog.WebApi.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     public class BlogController : Controller
     {
-
         private readonly IBlogService _blogService;
 
         public BlogController(IBlogService blogService)
@@ -25,7 +24,6 @@ namespace Blog.WebApi.Api.Controllers
         }
 
         [HttpGet]
-
         public async Task<IActionResult> GetPostById([FromQuery] Guid key)
         {
             var result = await _blogService.GetPostById(key);
@@ -34,6 +32,17 @@ namespace Blog.WebApi.Api.Controllers
                 return Json(result.Entity);
 
             return BadRequest(result.Message);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllPosts()
+        {
+            var result = await _blogService.GetAllPosts();
+
+            if (result.Success)
+                return Json(result.Entity);
+
+          return BadRequest(result.Message);
         }
     }
 }

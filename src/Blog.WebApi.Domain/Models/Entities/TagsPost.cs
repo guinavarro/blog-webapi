@@ -8,9 +8,9 @@ namespace Blog.WebApi.Domain.Models.Entities
         public int TagId { get; private set; }
 
         [ForeignKey("PostId")]
-        public ICollection<Post> Posts { get; set; }
+        public Post Post { get; set; }
         [ForeignKey("TagId")]
-        public ICollection<Tag> Tags { get; set; }
+        public Tag Tag { get; set; }
 
 
         public TagsPost()

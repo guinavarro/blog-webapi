@@ -7,5 +7,6 @@ namespace Blog.WebApi.Domain.Interfaces.Services
     {
         Task<Return<bool>> Post(CreatePostViewModel model);
         Task<Return<PostViewModel>> GetPostById(Guid key);
+        Task<Return<IEnumerable<PostViewModel>>> GetAllPosts();
     }
 }
