@@ -1,4 +1,6 @@
 ﻿using Blog.WebApi.Domain.Interfaces.Repository;
+using Blog.WebApi.Domain.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.WebApi.Infra.Repository
 {
@@ -10,5 +12,14 @@ namespace Blog.WebApi.Infra.Repository
         {
             _context = context;
         }
+
+        public async Task<Post> GetPostWithInclude(Guid key) =>
+            await _context.Posts.Where(p => p.Key == key)
+                .Include(p => p.ImagePost)
+                .Include(p => p.TagsPost)
+                    .ThenInclude(t => t.Tags)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+    
     }
 }

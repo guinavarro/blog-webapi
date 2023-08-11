@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.VisualBasic.FileIO;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
 namespace Blog.WebApi.Domain.Models.Entities
 {
@@ -12,7 +14,7 @@ namespace Blog.WebApi.Domain.Models.Entities
         {
             Name = name;
             Data = data;
-            ContentType = contentType;
+            ContentType = Regex.Replace(contentType, @"image\/", "");
         }
     }
 }
