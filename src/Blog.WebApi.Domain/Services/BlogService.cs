@@ -5,6 +5,8 @@ using Blog.WebApi.Domain.Interfaces.Services;
 using Blog.WebApi.Domain.Models.Entities;
 using Blog.WebApi.Domain.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Blog.WebApi.Domain.Services
 {
@@ -36,19 +38,24 @@ namespace Blog.WebApi.Domain.Services
                 if (model.Image is not null)
                 {
                     var imageKey = Guid.NewGuid();
-                    _imageFileRepository.Add(new ImageFile(GenerateFileName(model.Title, model.Image.ContentType), IFormFileToByteArray(model.Image), model.Image.ContentType, imageKey));
+
+                    var image = new ImageFile(GenerateFileName(model.Title, model.Image.ContentType), IFormFileToByteArray(model.Image), model.Image.ContentType, imageKey);
+                    _imageFileRepository.Add(image);
+                    await _imageFileRepository.SaveChangesAsync();
 
                     var imagePost = await _imageFileRepository.Find<ImageFile>(imageKey);
                     imageId = imagePost?.Id;
                 }
 
                 var postKey = Guid.NewGuid();
-                _postRepository.Add(new Post(1, model.Title, model.Message, postKey, imageId));
+                var post = new Post(1, model.Title, model.Message, postKey, imageId);
+
+                _postRepository.Add(post);
                 await _postRepository.SaveChangesAsync();
 
-                var post = await _postRepository.Find<Post>(postKey);
+                var postEntity = await _postRepository.Find<Post>(postKey);
 
-                if (model.Tags.Any())
+                if (model.Tags is not null && model.Tags.Any())
                 {
                     foreach (var tagModel in model.Tags)
                     {
@@ -57,7 +64,7 @@ namespace Blog.WebApi.Domain.Services
 
                         if (tagAlreadyExist.Item1 == true)
                         {
-                            _tagsPostRepository.Add(new TagsPost(post.Id, tagAlreadyExist.Item2.Value));
+                            _tagsPostRepository.Add(new TagsPost(postEntity.Id, tagAlreadyExist.Item2.Value));
                             await _tagRepository.SaveChangesAsync();
                         }
 
@@ -67,7 +74,7 @@ namespace Blog.WebApi.Domain.Services
                         await _tagRepository.SaveChangesAsync();
 
                         var lastTagInserted = await _tagRepository.Find<Tag>(tagKey);
-                        _tagsPostRepository.Add(new TagsPost(post.Id, lastTagInserted.Id));
+                        _tagsPostRepository.Add(new TagsPost(postEntity.Id, lastTagInserted.Id));
                         await _tagsPostRepository.SaveChangesAsync();
                     }
                 }
@@ -87,7 +94,7 @@ namespace Blog.WebApi.Domain.Services
 
 
         private string GenerateFileName(string postName, string fileType) =>
-            $"{postName.TransformToLowerCase()}_{DateTime.Now:ddMMyyyy_HHmm}.{fileType}";
+            $"{postName.TransformToLowerCase()}_{DateTime.Now:ddMMyyyy_HHmm}.{Regex.Replace(fileType, @"image\/", "")}";
         private static byte[] IFormFileToByteArray(IFormFile formFile)
         {
             using (var ms = new MemoryStream())

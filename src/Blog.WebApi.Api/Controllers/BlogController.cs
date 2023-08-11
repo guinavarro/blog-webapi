@@ -17,9 +17,8 @@ namespace Blog.WebApi.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] PostViewModel model)
+        public async Task<IActionResult> Post([FromForm] PostViewModel model)
         {
-
             var result = await _blogService.Post(model);
             return Ok();
         }
