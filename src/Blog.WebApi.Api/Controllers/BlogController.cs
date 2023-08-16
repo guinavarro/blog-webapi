@@ -35,9 +35,9 @@ namespace Blog.WebApi.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPosts()
+        public async Task<IActionResult> GetAllPosts([FromQuery] FilterViewModel filter)
         {
-            var result = await _blogService.GetAllPosts();
+            var result = await _blogService.GetAllPosts(filter);
 
             if (result.Success)
                 return Json(result.Entity);

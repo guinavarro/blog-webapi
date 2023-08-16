@@ -6,6 +6,7 @@ using Blog.WebApi.Domain.Models;
 using Blog.WebApi.Domain.Models.Entities;
 using Blog.WebApi.Domain.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
+using System.Linq;
 using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -20,7 +21,11 @@ namespace Blog.WebApi.Domain.Services
         private readonly ITagsPostRepository _tagsPostRepository;
         private readonly IImageFileRepository _imageFileRepository;
 
-        public BlogService(ITagRepository tagRepository, ITagsPostRepository tagsPostRepository, IPostRepository postRepository, IImageFileRepository imageFileRepository, IUnitOfWork unitOfWork)
+        public BlogService(ITagRepository tagRepository,
+        ITagsPostRepository tagsPostRepository,
+        IPostRepository postRepository, 
+        IImageFileRepository imageFileRepository, 
+        IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _tagRepository = tagRepository;
@@ -110,6 +115,7 @@ namespace Blog.WebApi.Domain.Services
                 Title = post.Title,
                 Message = post.Content,
                 Active = post.Active,
+                PublishDate = post.Date,
                 Tags = post.TagsPost.Any() ? post.TagsPost.Select(_ => _.Tag.Name).ToList() : null,
                 Image = post.ImagePost != null ? new ImageViewModel
                 {
@@ -122,8 +128,7 @@ namespace Blog.WebApi.Domain.Services
             return new Return<PostViewModel>(true, "A busca retornou o Post com sucesso", postViewModel);
         }
 
-
-        public async Task<Return<IEnumerable<PostViewModel>>> GetAllPosts() // TODO: criar filtro
+        public async Task<Return<IEnumerable<PostViewModel>>> GetAllPosts(FilterViewModel filter)
         {
             var postList = new List<PostViewModel>();
 
@@ -144,6 +149,7 @@ namespace Blog.WebApi.Domain.Services
                         Title = post.Title,
                         Message = post.Content,
                         Active = post.Active,
+                        PublishDate = post.Date,
                         Tags = post.TagsPost.Any() ? post.TagsPost.Select(_ => _.Tag.Name).ToList() : null,
                         Image = post.ImagePost != null ? new ImageViewModel
                         {
@@ -157,13 +163,37 @@ namespace Blog.WebApi.Domain.Services
                 }
             }
 
+
+            if (filter.PublishDate is not null)
+                postList = postList.Where(p => DateTime.Compare(p.PublishDate.Date, filter.PublishDate.Value.Date) == 0).ToList();
+            if (filter.ContainsInName is not null)
+                postList = postList.Where(p => TransformStringToSearch(p.Title).Contains(TransformStringToSearch(filter.ContainsInName))).ToList();
+            if (filter.ContainsInText is not null)
+                postList = postList.Where(p => TransformStringToSearch(p.Message).Contains(TransformStringToSearch(filter.ContainsInText))).ToList();
+            if (filter.Status is not null)
+                postList = postList.Where(p => p.Active == filter.Status).ToList();
+            if (filter.WithImage is not null)
+            {
+                if (filter.WithImage == true)
+                    postList = postList.Where(p => p.Image is not null).ToList();
+                else
+                    postList = postList.Where(p => p.Image is null).ToList();
+            }
+            if (filter.Tags is not null)
+            {
+                if (filter.Tags.Count > 0)
+                {
+                    postList = postList.Where(p => p.Tags.Intersect(filter.Tags).Any()).ToList();
+                }
+            }
+
             return new Return<IEnumerable<PostViewModel>>(true, $"Busca realizada com sucesso: ${postList.Count} registros", postList);
 
         }
 
         public async Task<Return<bool>> DisablePost(Guid key)
         {
-            if(key == Guid.Empty)
+            if (key == Guid.Empty)
             {
                 return new Return<bool>(false, "O Guid passado é inválido.");
             }
@@ -172,7 +202,7 @@ namespace Blog.WebApi.Domain.Services
 
             entity.UpdateActiveStatus(false);
 
-           var result = await  _postRepository.SaveChangesAsync();
+            var result = await _postRepository.SaveChangesAsync();
 
             if (result)
             {
@@ -187,6 +217,7 @@ namespace Blog.WebApi.Domain.Services
         #endregion
 
         #region Private Methods
+        private string TransformStringToSearch(string str) => str.RemoveAccents().ToLower();
         private string GenerateFileName(string postName, string fileType) =>
             $"{postName.TransformToLowerCase()}_{DateTime.Now:ddMMyyyy_HHmm}.{Regex.Replace(fileType, @"image\/", "")}";
         private static byte[] IFormFileToByteArray(IFormFile formFile)
@@ -196,7 +227,7 @@ namespace Blog.WebApi.Domain.Services
                 formFile.CopyTo(ms);
                 return ms.ToArray();
             }
-        }        
+        }
         #endregion
 
     }

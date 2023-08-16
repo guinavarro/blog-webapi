@@ -8,6 +8,7 @@
         public List<string>? Tags { get; set; }
         public ImageViewModel? Image { get; set; }
         public bool Active { get; set; }
+        public DateTime PublishDate { get; set; }
     }
 
     public record ImageViewModel
