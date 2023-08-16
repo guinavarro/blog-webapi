@@ -8,6 +8,7 @@ namespace Blog.WebApi.Domain.Models.Entities
         public int? FileId { get; private set; }
         public string Title { get; private set; }
         public string Content { get; private set; }
+        public bool Active { get; private set; }
 
 
         [ForeignKey("FileId")]
@@ -22,5 +23,6 @@ namespace Blog.WebApi.Domain.Models.Entities
             FileId = fileId;
         }
 
+        public void UpdateActiveStatus(bool active) => Active = active;
     }
 }

@@ -106,8 +106,11 @@ namespace Blog.WebApi.Domain.Services
 
             var postViewModel = new PostViewModel
             {
+                Key = post.Key,
                 Title = post.Title,
                 Message = post.Content,
+                Active = post.Active,
+                Tags = post.TagsPost.Any() ? post.TagsPost.Select(_ => _.Tag.Name).ToList() : null,
                 Image = post.ImagePost != null ? new ImageViewModel
                 {
                     Name = post.ImagePost.Name,
@@ -137,8 +140,10 @@ namespace Blog.WebApi.Domain.Services
                 {
                     var postViewModel = new PostViewModel
                     {
+                        Key = post.Key,
                         Title = post.Title,
                         Message = post.Content,
+                        Active = post.Active,
                         Tags = post.TagsPost.Any() ? post.TagsPost.Select(_ => _.Tag.Name).ToList() : null,
                         Image = post.ImagePost != null ? new ImageViewModel
                         {
@@ -156,6 +161,29 @@ namespace Blog.WebApi.Domain.Services
 
         }
 
+        public async Task<Return<bool>> DisablePost(Guid key)
+        {
+            if(key == Guid.Empty)
+            {
+                return new Return<bool>(false, "O Guid passado é inválido.");
+            }
+
+            var entity = await _postRepository.Find<Post>(key);
+
+            entity.UpdateActiveStatus(false);
+
+           var result = await  _postRepository.SaveChangesAsync();
+
+            if (result)
+            {
+                return new Return<bool>(true, "Post desativado com sucesso.", true);
+            }
+            else
+            {
+                return new Return<bool>(true, "Houve um erro na hora de tentar desativar o post.", true);
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -168,7 +196,7 @@ namespace Blog.WebApi.Domain.Services
                 formFile.CopyTo(ms);
                 return ms.ToArray();
             }
-        }
+        }        
         #endregion
 
     }

@@ -44,5 +44,16 @@ namespace Blog.WebApi.Api.Controllers
 
           return BadRequest(result.Message);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DisablePost([FromQuery] Guid key)
+        {
+            var result = await _blogService.DisablePost(key);
+
+            if (result.Success)
+                return Json(result.Entity);
+
+            return BadRequest(result.Message);
+        }
     }
 }
