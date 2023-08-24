@@ -1,8 +1,10 @@
-﻿namespace Blog.WebApi.Domain.Interfaces
+﻿using Blog.WebApi.Domain.Models.Entities;
+
+namespace Blog.WebApi.Domain.Interfaces
 {
     public interface ITokenService
     {
-        string GenerateToken();
+        string GenerateToken(User user);
     }
 
 }

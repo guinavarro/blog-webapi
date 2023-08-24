@@ -14,8 +14,9 @@ namespace Blog.WebApi.Infra.Mapping
         {
             base.Configure(builder);
 
+            builder.Property(_ => _.UserName).IsRequired(true);
             builder.Property(_ => _.Email).IsRequired(true);         
-            builder.Property(_ => _.Password).IsRequired(true);         
+            builder.Property(_ => _.PasswordHash).IsRequired(true);         
         }
     }
 }

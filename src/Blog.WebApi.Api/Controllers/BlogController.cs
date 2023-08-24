@@ -1,10 +1,12 @@
 ﻿using Blog.WebApi.Domain.Interfaces.Services;
 using Blog.WebApi.Domain.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.WebApi.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]/[action]")]
     public class BlogController : Controller
     {

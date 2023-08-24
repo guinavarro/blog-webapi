@@ -19,6 +19,7 @@ namespace Blog.WebApi.Infra
             services.AddScoped<IPostRepository, PostRepository>();
             services.AddScoped<ITagsPostRepository, TagsPostRepository>();
             services.AddScoped<IImageFileRepository, ImageFileRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
         }

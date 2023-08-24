@@ -19,7 +19,8 @@ namespace Blog.WebApi.Infra.Repository
             _context = context;
         }
 
-        public async Task<T> Find<T>(Guid guid) where T : Base => await _context.Set<T>().FirstOrDefaultAsync(_ => _.Key == guid);
+        public virtual async Task<T> Find<T>(Guid guid) where T : Base => await _context.Set<T>().FirstOrDefaultAsync(_ => _.Key == guid);
+
         public void Add<T>(T entity) where T : Base => _context.Add(entity);
 
         public void Delete<T>(T entity) where T : Base => _context.Remove(entity);        
