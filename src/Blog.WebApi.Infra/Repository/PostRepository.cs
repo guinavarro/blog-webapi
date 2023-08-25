@@ -13,8 +13,10 @@ namespace Blog.WebApi.Infra.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Post>> GetAllPosts() =>
-            await _context.Posts.AsNoTracking()
+        public async Task<IEnumerable<Post>> GetAllPosts(int userId) =>
+            await _context.Posts
+            .Where(x => x.AuthorId == userId)
+            .AsNoTracking()
             .Include(p => p.ImagePost)
             .Include(p => p.TagsPost)
                 .ThenInclude(t => t.Tag)

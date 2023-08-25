@@ -6,9 +6,8 @@ using Blog.WebApi.Domain.Models;
 using Blog.WebApi.Domain.Models.Entities;
 using Blog.WebApi.Domain.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
-using System.Linq;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Blog.WebApi.Domain.Services
 {
@@ -20,18 +19,23 @@ namespace Blog.WebApi.Domain.Services
         private readonly IPostRepository _postRepository;
         private readonly ITagsPostRepository _tagsPostRepository;
         private readonly IImageFileRepository _imageFileRepository;
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserService _userService;
         public BlogService(ITagRepository tagRepository,
         ITagsPostRepository tagsPostRepository,
         IPostRepository postRepository, 
         IImageFileRepository imageFileRepository, 
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IHttpContextAccessor httpContextAccessor,
+        IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _tagRepository = tagRepository;
             _postRepository = postRepository;
             _tagsPostRepository = tagsPostRepository;
             _imageFileRepository = imageFileRepository;
+            _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
 
         #endregion
@@ -42,7 +46,8 @@ namespace Blog.WebApi.Domain.Services
             try
             {
                 _unitOfWork.BeginTransaction();
-                // TODO: Criar validação pra ver qual é o usuário logado            
+
+                var authorId = await GetAuthorIdByAuthenticatedUser();
 
                 int? imageId = null;
                 if (model.Image is not null)
@@ -58,7 +63,7 @@ namespace Blog.WebApi.Domain.Services
                 }
 
                 var postKey = Guid.NewGuid();
-                var post = new Post(1, model.Title, model.Message, postKey, imageId);
+                var post = new Post(authorId, model.Title, model.Message, postKey, imageId);
 
                 _postRepository.Add(post);
                 await _postRepository.SaveChangesAsync();
@@ -95,7 +100,7 @@ namespace Blog.WebApi.Domain.Services
             catch
             {
                 await _unitOfWork.Rollback();
-                return new Return<bool>(true, "Houve um erro na hora de realizar o Post. Por favor, tente novamente");
+                return new Return<bool>(false, "Houve um erro na hora de realizar o Post. Por favor, tente novamente");
             }
         }
 
@@ -130,9 +135,10 @@ namespace Blog.WebApi.Domain.Services
 
         public async Task<Return<IEnumerable<PostViewModel>>> GetAllPosts(FilterViewModel filter)
         {
-            var postList = new List<PostViewModel>();
+            var authorId = await GetAuthorIdByAuthenticatedUser();
 
-            var posts = await _postRepository.GetAllPosts();
+            var postList = new List<PostViewModel>();
+            var posts = await _postRepository.GetAllPosts(authorId);
 
             if (posts == null)
             {
@@ -217,6 +223,15 @@ namespace Blog.WebApi.Domain.Services
         #endregion
 
         #region Private Methods
+
+        private async Task<int> GetAuthorIdByAuthenticatedUser()
+        {
+            var claimEmail = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email);
+            var user = await _userService.FindUserByEmail(claimEmail.Value);
+            var author = await _userService.FindAuthorByName(user.UserName);
+
+            return author.Id;
+        }
         private string TransformStringToSearch(string str) => str.RemoveAccents().ToLower();
         private string GenerateFileName(string postName, string fileType) =>
             $"{postName.TransformToLowerCase()}_{DateTime.Now:ddMMyyyy_HHmm}.{Regex.Replace(fileType, @"image\/", "")}";

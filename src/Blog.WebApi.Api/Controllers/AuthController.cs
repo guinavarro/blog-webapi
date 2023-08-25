@@ -1,11 +1,10 @@
 using Blog.WebApi.Api.Models;
 using Blog.WebApi.Domain.Interfaces;
 using Blog.WebApi.Domain.Interfaces.Repository;
+using Blog.WebApi.Domain.Interfaces.Services;
 using Blog.WebApi.Domain.Models.Entities;
+using Blog.WebApi.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace Blog.WebApi.Api.Controllers
 {
@@ -15,15 +14,15 @@ namespace Blog.WebApi.Api.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
-        private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
 
         public AuthController(IConfiguration configuration,
             ITokenService tokenService,
-            IUserRepository userRepository)
+            IUserService userService)
         {
             _configuration = configuration;
             _tokenService = tokenService;
-            _userRepository = userRepository;
+            _userService = userService;
         }
 
         [HttpPost("register")]
@@ -32,24 +31,33 @@ namespace Blog.WebApi.Api.Controllers
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             var user = new User(request.UserName, request.Email, passwordHash);
 
-            _userRepository.Add(user);
-            await _userRepository.SaveChangesAsync();
-
-            return Ok("Usuário criado com sucesso!");
+            var response = await _userService.Register(user);
+            
+            if (response.Success)
+            {
+                return Ok("Usuário criado com sucesso!");
+            }
+            else
+            {
+                return BadRequest("Houve um erro na hora de criar o Usuário");
+            }            
         }
 
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginUserDto request)
         {
-            var user = await _userRepository.FindUserByEmail(request.Email);
+            var user = await _userService.FindUserByEmail(request.Email);
 
-            // TODO: validar se usuário existe
+            if(user == null)
+            {
+                return BadRequest("Usuário não encontrado para o e-mail passado");
+            }
 
-            if(!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 return BadRequest("Senha errada");
             }
-            
+
             var token = _tokenService.GenerateToken(user);
 
             return Ok(token);
